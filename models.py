@@ -30,7 +30,7 @@ class User(db.Model, UserMixin):
     notifications = db.relationship('Notificaton', backref='user', lazy=True)
 
     def __repr__(self):
-        return f"User('{self.username}', '{self.email}')"
+        return f"User('{self.fullname}', '{self.email}')"
 
     def set_password(self, password):
         """Set the user's password."""
@@ -69,18 +69,18 @@ class LostItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     item_name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    category_id = db.Column(db.Integer, db.ForeignKey('ItemCategory.id'), nullable=True)
-    category = db.relationship('ItemCategory', backref='LostItem', lazy=True)
-    lost_location_id = db.Column(db.Integer, db.ForeignKey('LostLocation.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('item_category.id'), nullable=True)
+    category = db.relationship('ItemCategory', backref='lost_items', lazy=True)
+    lost_location_id = db.Column(db.Integer, db.ForeignKey('lost_location.id'), nullable=False)
     date_lost = db.Column(db.DateTime, default=datetime.utcnow)
     is_found = db.Column(db.Boolean, default=False)
     file_path = db.Column(db.String(255), nullable=True)  # New field for file path
 
     # Define relationships
     reporter_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    item_images = db.relationship('ItemImage', backref='LostItem', lazy=True)
-    location = db.relationship('LostLocation', backref='LostItem', lazy=True)
-    notifications = db.relationship('Notification', backref='lost_item', lazy=True)
+    item_images = db.relationship('ItemImage', backref='lost_items', lazy=True)
+    location = db.relationship('LostLocation', backref='lost_items', lazy=True)
+    notifications = db.relationship('Notification', backref='lost_items', lazy=True)
 
     def save_to_db(self):
         """
@@ -92,7 +92,7 @@ class LostItem(db.Model):
 
 class ItemImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    item_id = db.Column(db.Integer, db.ForeignKey('LostItem.id'), nullable=False)
+    item_id = db.Column(db.Integer, db.ForeignKey('lost_item.id'), nullable=False)
     file_path = db.Column(db.LargeBinary, nullable=True)
 
 class LostLocation(db.Model):
@@ -106,6 +106,6 @@ class LostLocation(db.Model):
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    item_id = db.Column(db.Integer, db.ForeignKey('LostItem.id'), nullable=False)
+    item_id = db.Column(db.Integer, db.ForeignKey('lost_item.id'), nullable=False)
     notification_type = db.Column(db.String(50), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)

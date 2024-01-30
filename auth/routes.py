@@ -26,7 +26,11 @@ def register():
 
     if form.validate_on_submit():
         # Dummy registration logic (To be replaced with the database logic)
-        session['user'] = {'full_name': form.full_name.data, 'email': form.email.data}
+        new_user = User(fullname=form.full_name.data, email=form.email.data)
+        new_user.set_password(form.password.data)
+        db.session.add(new_user)
+        db.session.commit()
+
         flash('Registration successful!', 'success')
         return redirect(url_for('index'))
 
