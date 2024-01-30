@@ -214,4 +214,12 @@ def create_lost_location(item_id):
     location = LostLocation(
         street_address=data['street_address'],
         cell=data['cell'],
-        secto
+        sector=data['sector'],
+        district=data['district'],
+        province=data['province']
+    )
+
+    item.locations.append(location)
+    db.session.commit()
+    
+    return jsonify({'message': 'Location created successfully'})
