@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, TextAreaField, SubmitField
 from wtforms.validators import DataRequired, Length
 
@@ -29,3 +30,8 @@ class MarkAsFoundForm(FlaskForm):
 class DeleteItemForm(FlaskForm):
     # Form for deleting an item
     submit = SubmitField('Delete Item')
+
+    class ItemImageForm(FlaskForm):
+    # Add fields for image upload form
+    image = FileField('Upload Image', validators=[FileAllowed(['jpg', 'png', 'jpeg', 'gif'], 'Images only!')])
+    submit = SubmitField('Upload')

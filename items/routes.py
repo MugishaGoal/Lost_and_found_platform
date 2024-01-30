@@ -1,14 +1,17 @@
 #!/usr/bin/python3
 
-# routes.py
-
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import jsonify, request
+from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 import os
 
-from .models import db, LostItem
+from models import db, LostItem, ItemImage
+from items.forms import ItemImageForm
 
 items_bp = Blueprint('items', __name__)
+item_images_bp = Blueprint('item_images', __name__)
+
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'doc', 'docx'}
 
@@ -151,3 +154,64 @@ def delete_lost_item(item_id):
         return jsonify({'message': 'Lost item deleted successfully'})
     else:
         return jsonify({'error': 'Lost item not found'}), 404
+
+
+@item_images_bp.route('/upload_image/<int:item_id>', methods=['GET', 'POST'])
+@login_required
+def upload_image(item_id):
+    form = ItemImageForm()
+
+    if form.validate_on_submit():
+        # Save the image to the database
+        image = form.image.data
+        item_image = ItemImage(item_id=item_id, image=image.read())
+        db.session.add(item_image)
+        db.session.commit()
+
+        flash('Image uploaded successfully!', 'success')
+        return redirect(url_for('items.item_details', item_id=item_id))
+
+    return render_template('items/upload_image.html', form=form)
+
+
+@lost_locations_bp.route('', methods=['GET'])
+def get_all_lost_locations(item_id):
+    item = LostItem.query.get_or_404(item_id)
+    locations = item.locations.all()
+    locations_json = [location.to_dict() for location in locations]
+    return jsonify(locations_json)
+
+@lost_locations_bp.route('/<int:location_id>', methods=['GET', 'PUT', 'DELETE'])
+def manage_lost_location(item_id, location_id):
+    item = LostItem.query.get_or_404(item_id)
+    location = LostLocation.query.get_or_404(location_id)
+
+    if request.method == 'GET':
+        return jsonify(location.to_dict())
+
+    elif request.method == 'PUT':
+        data = request.get_json()
+        # Update location details based on request data
+        location.street_address = data.get('street_address', location.street_address)
+        location.cell = data.get('cell', location.cell)
+        location.sector = data.get('sector', location.sector)
+        location.district = data.get('district', location.district)
+        location.province = data.get('province', location.province)
+        db.session.commit()
+        return jsonify({'message': 'Location updated successfully'})
+
+    elif request.method == 'DELETE':
+        db.session.delete(location)
+        db.session.commit()
+        return jsonify({'message': 'Location deleted successfully'})
+
+@lost_locations_bp.route('', methods=['POST'])
+def create_lost_location(item_id):
+    item = LostItem.query.get_or_404(item_id)
+    data = request.get_json()
+
+    # Create a new lost location for the item
+    location = LostLocation(
+        street_address=data['street_address'],
+        cell=data['cell'],
+        secto
