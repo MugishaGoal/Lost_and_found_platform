@@ -1,16 +1,13 @@
 #!/usr/bin/python3
 
-from flask import render_template, redirect, url_for, flash, session
-from your_flask_app import app
+from app import db
+from flask import render_template, Blueprint, redirect, url_for, flash, session
 from .forms import RegistrationForm, LoginForm
+from ..models import User
 
-# Dummy user data (to be replaced with the database logic)
-dummy_users = [
-    {'full_name': 'John Doe', 'email': 'john@example.com', 'password': 'password123'},
-    {'full_name': 'Alice Smith', 'email': 'alice@example.com', 'password': 'password456'}
-]
+auth_bp = Blueprint('auth_bp', __name__)
 
-@app.route('/register', methods=['GET', 'POST'])
+@auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     """
     Handle user registration.
@@ -25,9 +22,17 @@ def register():
     form = RegistrationForm()
 
     if form.validate_on_submit():
-        # Dummy registration logic (To be replaced with the database logic)
+        # Checks if the Use ris registered
+        existing_user = User.query.filter_by(email=form.email.data).first()
+        if existing_user:
+            flash('Email address is already registered. Please use a different email.', 'danger')
+            return render_template('register.html', form=form)
+
+        # Creates a New User
         new_user = User(fullname=form.full_name.data, email=form.email.data)
         new_user.set_password(form.password.data)
+
+        # Adds a User to the Database
         db.session.add(new_user)
         db.session.commit()
 
@@ -36,7 +41,7 @@ def register():
 
     return render_template('register.html', form=form)
 
-@app.route('/login', methods=['GET', 'POST'])
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     """
     Handle user login.
@@ -51,19 +56,20 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        # Dummy login logic (Replace with your database logic)
-        user = next((u for u in dummy_users if u['email'] == form.email.data and u['password'] == form.password.data), None)
+        # Checks if the user exists
+        user = User.query.filter_by(email=form.email.data).first()
 
-        if user:
-            session['user'] = {'full_name': user['full_name'], 'email': user['email']}
-            flash('Login successful!', 'success')
-            return redirect(url_for('index'))
+        if user and user.check_password(form.password.data):
+             session['user'] = {'full_name': user.fullname, 'email': user.email}
+             flash('Login successful!', 'success')
+             return redirect(url_for('index'))
         else:
             flash('Invalid email or password. Please try again.', 'danger')
 
     return render_template('login.html', form=form)
 
-@app.route('/logout')
+
+@auth_bp.route('/logout')
 def logout():
     """
     Handle user logout.
