@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+
+{% block title %}Edit User Profile{% endblock %}
+
+{% block content %}
+    <h2>Edit User Profile</h2>
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.new_username.label }} {{ form.new_username }}
+        </div>
+        <div>
+            {{ form.new_email.label }} {{ form.new_email }}
+        </div>
+        <div>
+            {{ form.new_password.label }} {{ form.new_password }}
+        </div>
+        <div>
+            {{ form.confirm_new_password.label }} {{ form.confirm_new_password }}
+        </div>
+        <div>
+            {{ form.submit }}
+        </div>
+    </form>
+{% endblock %}

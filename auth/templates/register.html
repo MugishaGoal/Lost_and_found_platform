@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+    <h2>Register</h2>
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.full_name.label }} {{ form.full_name }}
+        </div>
+        <div>
+            {{ form.email.label }} {{ form.email }}
+        </div>
+        <div>
+            {{ form.password.label }} {{ form.password }}
+        </div>
+        <div>
+            {{ form.confirm_password.label }} {{ form.confirm_password }}
+        </div>
+        <div>
+            {{ form.submit }}
+        </div>
+    </form>
+    <p>Already have an account? <a href="{{ url_for('auth_bp.login') }}">Login</a></p>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+
+{% block title %}Upload Image{% endblock %}
+
+{% block content %}
+    <h2>Upload Image</h2>
+    <form method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.image.label }} {{ form.image }}
+        </div>
+        <div>
+            {{ form.submit }}
+        </div>
+    </form>
+{% endblock %}

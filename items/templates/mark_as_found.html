@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+
+{% block title %}Mark Item as Found{% endblock %}
+
+{% block content %}
+    <h2>Mark Item as Found</h2>
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.submit }}
+        </div>
+    </form>
+{% endblock %}
