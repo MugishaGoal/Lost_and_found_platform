@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import os, unittest
 from flask import Flask
 from app import db
